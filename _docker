@@ -62,28 +62,13 @@ __docker_get_containers() {
     done
     lines=(${lines[2,-1]})
 
-    # Container ID
-    local line
-    local s
-    for line in $lines; do
-        s="${line[${begin[CONTAINER ID]},${end[CONTAINER ID]}]%% ##}"
-        s="$s:${(l:15:: :::)${${line[${begin[CREATED]},${end[CREATED]}]/ ago/}%% ##}}"
-        s="$s, ${${${line[${begin[IMAGE]},${end[IMAGE]}]}/:/\\:}%% ##}"
-        if [[ ${line[${begin[STATUS]},${end[STATUS]}]} = Exit* ]]; then
-            stopped=($stopped $s)
-        else
-            running=($running $s)
-        fi
-    done
-
     # Names
     local name
     local -a names
     for line in $lines; do
         names=(${(ps:,:)${${line[${begin[NAMES]},-1]}%% *}})
         for name in $names; do
-            s="${name}:${(l:15:: :::)${${line[${begin[CREATED]},${end[CREATED]}]/ ago/}%% ##}}"
-            s="$s, ${${${line[${begin[IMAGE]},${end[IMAGE]}]}/:/\\:}%% ##}"
+            s="${name}"
             if [[ ${line[${begin[STATUS]},${end[STATUS]}]} = Exit* ]]; then
                 stopped=($stopped ${s#*/})
             else
@@ -485,7 +470,7 @@ __docker_subcommand() {
                 "($help -f --force)"{-f,--force}"[Force removal]" \
                 "($help -l --link)"{-l,--link}"[Remove the specified link and not the underlying container]" \
                 "($help -v --volumes)"{-v,--volumes}"[Remove the volumes associated to the container]" \
-                "($help -)*:containers:__docker_stoppedcontainers" && ret=0
+                "($help -)*:containers:__docker_runningcontainers" && ret=0
             ;;
         (rmi)
             _arguments \
